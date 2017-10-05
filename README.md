@@ -64,3 +64,21 @@ ip route 10.2.0.10 255.255.255.255 Tunnel2
 After setup VxLAN, ping from both side CSR1000v to the other will be ok.<br>
 Also, ping from VM1/VM2 to VM3 will be ok.<br>
 
+Insight<br>
+-----------------
+In this case, we use VxLAN general protocol extension (GPE) instead of VxLAN.<br>
+VxLAN GPE is design for encapsulate other protocol inside VxLAN, but without complex configuration.<br>
+Detail information https://www.ietf.org/id/draft-ietf-nvo3-vxlan-gpe-04.txt <br>
+If look inside VxLAN-GPE packet format, it encapsulates ICMP directly into VxLAN.Don’t need to assign VNI information.<br>
+From CSR1000v configuration, just setup tunnel interface doesn’t need to take care inner packet MAC lookup.<br>
+![](https://github.com/yinghli/CSR1000v-VxLAN/blob/master/packet.png)
+
+Host ARP<br>
+------------------------
+By default, if VM1/VM2 want to talk with VM3 in same subnet, it will generate ARP for querying destination MAC.<br>
+After we test it, Windows and CentOS can send the packet with default gateway MAC instead of destination MAC.<br> 
+Ubuntu will not use default gateway MAC, we must add static ARP in this case.<br> 
+Azure default behavior:
+Azure VM sent traffic with default destination MAC (1234.5678.9abc)<br>
+All packet sent to VM with default destination MAC (547f.ee75.b5bc)<br>
+
